@@ -1,4 +1,7 @@
-from sqlalchemy import Integer, String, Column, Boolean, DateTime
+from sqlalchemy import Integer, String, Column, Boolean
+from sqlalchemy.orm import relationship
+from task_list.models import TaskList
+
 from core.database import Base
 
 
@@ -9,5 +12,8 @@ class User(Base):
     username = Column(String, unique=True)
     email = Column(String, unique=True)
     password = Column(String)
-    date = Column(DateTime)
     is_active = Column(Boolean, default=False)
+    lists = relationship("TaskList", back_populates="user")
+
+    def __repr__(self) -> str:
+        return f"User: [{self.id}, {self.username}]"

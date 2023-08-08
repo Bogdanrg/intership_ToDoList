@@ -13,6 +13,9 @@ psycopg-binary = "*"
 pydantic = "*"
 pydantic-settings = "*"
 sqlalchemy = "*"
+sqlalchemy-utils = "*"
+passlib = {version = "*", extras = ["bcrypt"]}
+pyjwt = "*"
 
 [dev-packages]
 
