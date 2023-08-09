@@ -31,7 +31,7 @@ class JWTService:
 
     @staticmethod
     async def check_credentials(
-        session: AsyncSession, username: str, password: str
+            session: AsyncSession, username: str, password: str
     ) -> bool:
         user = await UserRepository.get_user_by_username(username, session)
         if not user:
@@ -47,7 +47,7 @@ class JWTService:
                 "username": username,
                 "type": "access_token",
                 "exp": datetime.datetime.now(tz=datetime.timezone.utc)
-                + datetime.timedelta(minutes=5),
+                       + datetime.timedelta(minutes=5),
             },
             app_settings.SECRET,
             algorithm=app_settings.ALGORITHM,
@@ -61,7 +61,7 @@ class JWTService:
                 "username": username,
                 "type": "refresh_token",
                 "exp": datetime.datetime.now(tz=datetime.timezone.utc)
-                + datetime.timedelta(hours=24),
+                       + datetime.timedelta(hours=24),
             },
             app_settings.SECRET,
             algorithm=app_settings.ALGORITHM,
@@ -83,7 +83,7 @@ class JWTService:
 
     @staticmethod
     async def refresh_access_token(
-        session: AsyncSession, refresh_token: str
+            session: AsyncSession, refresh_token: str
     ) -> dict | bool:
         payload = await JWTService.decode_token(refresh_token)
         if not payload:
@@ -97,7 +97,6 @@ class JWTService:
 
         tokens = {"access_token": access_token, "refresh_token": refresh_token}
         return tokens
-
 
     @staticmethod
     async def login_required(access_token: str = Query()) -> None:
