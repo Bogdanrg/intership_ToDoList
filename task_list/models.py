@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+
 from core.database import Base
 from task.models import Task
 
@@ -12,4 +13,4 @@ class TaskList(Base):
     active_date = Column(DateTime)
     user_id = Column(Integer, ForeignKey("users.id"))
     user = relationship("User", back_populates="lists")
-    tasks = relationship("Task", backref='list')
+    tasks = relationship("Task", backref="list")

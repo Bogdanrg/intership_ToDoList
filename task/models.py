@@ -1,15 +1,13 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text
-from core.database import Base
+from sqlalchemy import Column, ForeignKey, Integer, String, Text
 from sqlalchemy_utils.types import ChoiceType
+
+from core.database import Base
 
 
 class Task(Base):
     __tablename__ = "tasks"
 
-    TASK_STATUSES = (
-        ('done', 'done'),
-        ('in-progress', 'in-progress')
-    )
+    TASK_STATUSES = (("done", "done"), ("in-progress", "in-progress"))
 
     id = Column(Integer, primary_key=True)
     name = Column(String)

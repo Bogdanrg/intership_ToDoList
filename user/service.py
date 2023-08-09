@@ -1,6 +1,7 @@
 import datetime
-import jwt
 
+import jwt
+from fastapi import HTTPException, Query
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -21,7 +22,6 @@ class HasherService:
 
 
 class JWTService:
-
     @staticmethod
     async def get_token_pair(username: str) -> dict:
         access_token = await JWTService.encode_access_token(username)
@@ -30,7 +30,9 @@ class JWTService:
         return tokens
 
     @staticmethod
-    async def check_credentials(session: AsyncSession, username: str, password: str) -> bool:
+    async def check_credentials(
+        session: AsyncSession, username: str, password: str
+    ) -> bool:
         user = await UserRepository.get_user_by_username(username, session)
         if not user:
             return False
@@ -45,10 +47,10 @@ class JWTService:
                 "username": username,
                 "type": "access_token",
                 "exp": datetime.datetime.now(tz=datetime.timezone.utc)
-                       + datetime.timedelta(minutes=5),
+                + datetime.timedelta(minutes=5),
             },
             app_settings.SECRET,
-            algorithm=app_settings.ALGORITHM
+            algorithm=app_settings.ALGORITHM,
         )
         return access_token
 
@@ -59,7 +61,7 @@ class JWTService:
                 "username": username,
                 "type": "refresh_token",
                 "exp": datetime.datetime.now(tz=datetime.timezone.utc)
-                       + datetime.timedelta(hours=24),
+                + datetime.timedelta(hours=24),
             },
             app_settings.SECRET,
             algorithm=app_settings.ALGORITHM,
@@ -67,10 +69,10 @@ class JWTService:
         return refresh_token
 
     @staticmethod
-    async def decode_refresh_token(refresh_token) -> dict | bool:
+    async def decode_token(token: str) -> dict | bool:
         try:
             return jwt.decode(
-                refresh_token,
+                token,
                 app_settings.SECRET,
                 algorithms=app_settings.ALGORITHM,
             )
@@ -80,8 +82,10 @@ class JWTService:
             return False
 
     @staticmethod
-    async def refresh_access_token(session: AsyncSession, refresh_token: str) -> dict | bool:
-        payload = await JWTService.decode_refresh_token(refresh_token)
+    async def refresh_access_token(
+        session: AsyncSession, refresh_token: str
+    ) -> dict | bool:
+        payload = await JWTService.decode_token(refresh_token)
         if not payload:
             return False
 
@@ -94,6 +98,12 @@ class JWTService:
         tokens = {"access_token": access_token, "refresh_token": refresh_token}
         return tokens
 
+
     @staticmethod
-    async def varify_access_token(access_token: str):
-        pass
+    async def login_required(access_token: str = Query()) -> None:
+
+        payload: dict = await JWTService.decode_token(access_token)
+        if not payload:
+            raise HTTPException(
+                "To"
+            )

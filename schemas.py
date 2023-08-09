@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel
 
 
@@ -11,7 +9,7 @@ class SignUpModel(BaseModel):
     class Config:
         from_attributes = True
         json_schema_extra = {
-            'example': {
+            "example": {
                 "username": "Bogdan",
                 "email": "bogdan@gmail.com",
                 "password": "password",

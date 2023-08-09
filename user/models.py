@@ -1,8 +1,8 @@
-from sqlalchemy import Integer, String, Column, Boolean
+from sqlalchemy import Boolean, Column, Integer, String
 from sqlalchemy.orm import relationship
-from task_list.models import TaskList
 
 from core.database import Base
+from task_list.models import TaskList
 
 
 class User(Base):
