@@ -1,29 +1,32 @@
-from fastapi import Request, HTTPException
-from user.service import JWTService
-from repos.user_repo import UserRepository
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
 from base.classes import AsyncSessionManager
+from repos.user_repo import UserRepository
+from user.service import JWTService
+
+from .services import AuthMiddlewareService
 
 
 class AuthMiddleware:
-    async def __call__(self, request: Request, call_next):
-        print(request.url)
-        token_exception = HTTPException(
-            status_code=400,
-            detail="Token wasn't provided"
-        )
-        async with AsyncSessionManager() as session:
-            token = request.headers.get("JWT")
-            if not token:
-                return token_exception
-            payload = await JWTService.decode_token(token)
-            if not payload:
-                return HTTPException(
-                    status_code=400,
-                    detail="Invalid token"
+    async def __call__(self, request: Request, call_next) -> JSONResponse:
+        if not AuthMiddlewareService.is_safe_path(request):
+            async with AsyncSessionManager() as session:
+                token = AuthMiddlewareService.get_token(request)
+                if not token:
+                    return JSONResponse(
+                        content="Token wasn't provided", status_code=400
+                    )
+                payload = await JWTService.decode_token(token)
+                if not payload:
+                    return JSONResponse(content="Invalid token", status_code=400)
+                user = await UserRepository.get_user_by_username(
+                    payload.get("username", ""), session
                 )
-            user = await UserRepository.get_user_by_username(payload.get("username"), session)
-            if not user:
-                return token_exception
-            setattr(request, "user", user)
-            response = await call_next(request)
-            return response
+                if not user:
+                    return JSONResponse(content="Invalid token", status_code=400)
+                request.state.user = user
+                response = await call_next(request)
+                return response
+        response = await call_next(request)
+        return response

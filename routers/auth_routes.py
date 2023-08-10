@@ -1,6 +1,6 @@
-from typing import Annotated, Any
+from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, dependencies
+from fastapi import APIRouter, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
@@ -25,17 +25,6 @@ async def register_user(user: SignUpModel) -> Any:
     return "Created"
 
 
-@auth_router.put(
-    "/change-username/", dependencies=[Depends(JWTService.login_required)]
-)
-async def update_username(
-    username: Annotated[str | None, Query(max_length=100)] = "new_username",
-) -> Any:
-    async with AsyncSession(engine) as session, session.begin():
-        await UserRepository.update_one(session, 1, username=username)
-    return "Updated"
-
-
 @auth_router.post("/login/", response_model=TokenPairModel)
 async def login_user(user: SignInModel) -> Any:
     async with AsyncSession(engine) as session, session.begin():
@@ -52,9 +41,14 @@ async def login_user(user: SignInModel) -> Any:
 
 
 @auth_router.post("/refresh/", response_model=TokenPairModel)
-async def refresh_access_token(refresh_token: str) -> Any:
+async def refresh_access_token(request: Request) -> Any:
+    token = request.headers.get("JWT")
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Token wasn't provided"
+        )
     async with AsyncSession(engine) as session, session.begin():
-        tokens = await JWTService.refresh_access_token(session, refresh_token)
+        tokens = await JWTService.refresh_access_token(session, token)
         if not tokens:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid refresh token"
