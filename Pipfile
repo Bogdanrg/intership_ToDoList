@@ -16,6 +16,9 @@ sqlalchemy = "*"
 sqlalchemy-utils = "*"
 passlib = {version = "*", extras = ["bcrypt"]}
 pyjwt = "*"
+pytest-asyncio = "*"
+pytest = "*"
+httpx = "*"
 
 [dev-packages]
 

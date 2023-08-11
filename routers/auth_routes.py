@@ -1,11 +1,9 @@
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request
-from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from base.classes import AsyncSessionManager
-from core.database import engine
 from repos.user_repo import UserRepository
 from schemas import SignInModel, SignUpModel, TokenPairModel
 from user.service import HasherService, JWTService
@@ -13,21 +11,21 @@ from user.service import HasherService, JWTService
 auth_router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
-@auth_router.post("/registration/")
+@auth_router.post("/registration/", response_model=SignUpModel)
 async def register_user(user: SignUpModel) -> Any:
     async with AsyncSessionManager() as session:
-        await UserRepository.insert_one(
+        user = await UserRepository.insert_one(
             session,
             username=user.username,
             email=user.email,
             password=HasherService.get_password_hash(user.password),
         )
-    return "Created"
+    return user
 
 
 @auth_router.post("/login/", response_model=TokenPairModel)
 async def login_user(user: SignInModel) -> Any:
-    async with AsyncSession(engine) as session, session.begin():
+    async with AsyncSessionManager() as session:
         is_valid_user = await JWTService.check_credentials(
             session, user.username, user.password
         )
@@ -47,7 +45,7 @@ async def refresh_access_token(request: Request) -> Any:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Token wasn't provided"
         )
-    async with AsyncSession(engine) as session, session.begin():
+    async with AsyncSessionManager() as session:
         tokens = await JWTService.refresh_access_token(session, token)
         if not tokens:
             raise HTTPException(

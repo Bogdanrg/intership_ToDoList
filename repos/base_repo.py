@@ -8,9 +8,10 @@ class BaseRepository:
     table: Base
 
     @classmethod
-    async def insert_one(cls, session: AsyncSession, **kwargs) -> None:
+    async def insert_one(cls, session: AsyncSession, **kwargs) -> Base:
         new_row = cls.table(**kwargs)
         session.add(new_row)
+        return new_row
 
     @classmethod
     async def delete_one(cls, obj_id: int, session: AsyncSession) -> None:
