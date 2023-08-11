@@ -1,0 +1,27 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pre-commit = "*"
+asyncpg = "*"
+uvicorn = "*"
+alembic = "*"
+fastapi = "*"
+psycopg-binary = "*"
+pydantic = "*"
+pydantic-settings = "*"
+sqlalchemy = "*"
+sqlalchemy-utils = "*"
+passlib = {version = "*", extras = ["bcrypt"]}
+pyjwt = "*"
+pytest-asyncio = "*"
+pytest = "*"
+httpx = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.11"
+python_full_version = "3.11.4"
