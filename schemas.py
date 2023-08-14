@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
@@ -31,3 +32,16 @@ class SignInModel(BaseModel):
 class TokenPairModel(BaseModel):
     access_token: str
     refresh_token: str
+
+
+class TaskListModel(BaseModel):
+    id: Optional[int] = None
+    name: str
+    active_date: datetime
+
+
+class TaskModel(BaseModel):
+    id: Optional[int] = None
+    name: str
+    content: str
+    list_id: Optional[int] = None

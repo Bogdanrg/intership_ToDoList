@@ -26,6 +26,7 @@ class AuthMiddleware:
                 if not user:
                     return JSONResponse(content="Invalid token", status_code=400)
                 request.state.user = user
+                request.state.session = session
                 response = await call_next(request)
                 return response
         response = await call_next(request)

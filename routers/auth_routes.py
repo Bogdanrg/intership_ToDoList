@@ -14,6 +14,19 @@ auth_router = APIRouter(prefix="/api/auth", tags=["auth"])
 @auth_router.post("/registration/", response_model=SignUpModel)
 async def register_user(user: SignUpModel) -> Any:
     async with AsyncSessionManager() as session:
+        user_username = await UserRepository.get_user_by_username(
+            user.username, session
+        )
+        if user_username is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username must be unique",
+            )
+        user_email = await UserRepository.get_user_by_email(user.email, session)
+        if user_email is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Email must be unique"
+            )
         user = await UserRepository.insert_one(
             session,
             username=user.username,
