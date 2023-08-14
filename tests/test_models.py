@@ -1,6 +1,8 @@
 import pytest
 
 from constants import user
+from repos.task_list_repo import TaskListRepository
+from repos.task_repo import TaskRepository
 from repos.user_repo import UserRepository
 
 
@@ -52,3 +54,72 @@ async def test_get_user_by_username(async_db_session):
     )
     assert user_obj.password == user["password"]
     assert user_obj.username == user["username"]
+
+
+@pytest.mark.asyncio
+async def test_get_task_list_by_name_and_user(async_db_session):
+    user_obj = await UserRepository.insert_one(async_db_session, **user)
+    await TaskListRepository.insert_one(
+        async_db_session, name="task_list", user=user_obj
+    )
+    await async_db_session.commit()
+    task_list_obj = await TaskListRepository.get_task_list_by_name_and_user(
+        async_db_session, "task_list", user_obj
+    )
+    assert task_list_obj.name == "task_list"
+    assert task_list_obj.user_id == user_obj.id
+
+
+@pytest.mark.asyncio
+async def test_get_task_list_by_another_user(async_db_session):
+    user_obj = await UserRepository.insert_one(async_db_session, **user)
+    user_another_obj = await UserRepository.insert_one(
+        async_db_session, username="abc", email="email", password="hey"
+    )
+    await TaskListRepository.insert_one(
+        async_db_session, name="task_list", user=user_obj
+    )
+    await async_db_session.commit()
+    task_list_obj = await TaskListRepository.get_task_list_by_name_and_user(
+        async_db_session, "task_list", user_another_obj
+    )
+    assert task_list_obj is None
+
+
+@pytest.mark.asyncio
+async def test_get_task_by_name_and_list(async_db_session):
+    user_obj = await UserRepository.insert_one(async_db_session, **user)
+
+    task_list_obj = await TaskListRepository.insert_one(
+        async_db_session, name="task_list", user=user_obj
+    )
+    await TaskRepository.insert_one(
+        async_db_session, name="abc", content="content", list=task_list_obj
+    )
+    await async_db_session.commit()
+    task_obj = await TaskRepository.get_task_by_name_and_list(
+        async_db_session, "abc", task_list_obj
+    )
+    assert task_obj.name == "abc"
+    assert task_obj.content == "content"
+    assert task_obj.list_id == task_list_obj.id
+
+
+@pytest.mark.asyncio
+async def test_get_task_by_name_and_wrong_list(async_db_session):
+    user_obj = await UserRepository.insert_one(async_db_session, **user)
+
+    task_list_obj = await TaskListRepository.insert_one(
+        async_db_session, name="task_list", user=user_obj
+    )
+    task_list_another_obj = await TaskListRepository.insert_one(
+        async_db_session, name="new_task", user=user_obj
+    )
+    await TaskRepository.insert_one(
+        async_db_session, name="abc", content="content", list=task_list_obj
+    )
+    await async_db_session.commit()
+    task_obj = await TaskRepository.get_task_by_name_and_list(
+        async_db_session, "abc", task_list_another_obj
+    )
+    assert task_obj is None
