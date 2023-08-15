@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from base.classes import AsyncSessionManager
 from core.database import async_session, engine
+from user.service import JWTService
 
 
 @pytest_asyncio.fixture(scope="function")
@@ -42,3 +43,10 @@ def event_loop():
 async def session_fixture() -> AsyncSession:
     async with AsyncSessionManager() as session:
         yield session
+
+
+@pytest.fixture
+async def access_token() -> str:
+    access_token = await JWTService.encode_access_token("Bogdan")
+    yield access_token
+    del access_token
