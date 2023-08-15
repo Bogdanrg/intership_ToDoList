@@ -17,6 +17,7 @@ class AsyncSessionManager:
             logging.error(f"Exception occurred, type: {exc_type}, value: {exc_val}")
             await self.rollback()
         else:
+            logging.info("Session was closed")
             await self.commit()
 
     async def commit(self) -> None:

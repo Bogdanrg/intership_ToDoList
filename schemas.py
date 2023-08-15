@@ -37,7 +37,7 @@ class TokenPairModel(BaseModel):
 class TaskListModel(BaseModel):
     id: Optional[int] = None
     name: str
-    active_date: datetime
+    active_date: Optional[datetime] = None
 
 
 class TaskModel(BaseModel):
