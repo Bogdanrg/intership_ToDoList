@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
+from sqlalchemy_utils import Choice
 
 
 class SignUpModel(BaseModel):
@@ -44,4 +45,9 @@ class TaskModel(BaseModel):
     id: Optional[int] = None
     name: str
     content: str
+    status: Optional[Choice | str] = None
     list_id: Optional[int] = None
+
+    class Config:
+        json_encoders = {Choice: lambda c: c.value if type(c) != str else c}
+        arbitrary_types_allowed = True

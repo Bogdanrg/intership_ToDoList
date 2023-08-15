@@ -39,7 +39,7 @@ async def create_list(request: Request, task_list: TaskListModel) -> Any:
     response_model=List[TaskModel],
     dependencies=[Depends(jwt_required)],
 )
-async def get_task_list(request: Request, task_list_name: str):
+async def get_task_list(request: Request, task_list_name: str) -> Any:
     async with AsyncSessionManager() as session:
         task_list_obj = await TaskListRepository.get_task_list_by_name_and_user(
             session, task_list_name, request.state.user
@@ -58,7 +58,7 @@ async def get_task_list(request: Request, task_list_name: str):
     response_model=TaskModel,
     dependencies=[Depends(jwt_required)],
 )
-async def add_task(request: Request, task_list_name: str, task: TaskModel):
+async def add_task(request: Request, task_list_name: str, task: TaskModel) -> Any:
     async with AsyncSessionManager() as session:
         task_list_obj = await TaskListRepository.get_task_list_by_name_and_user(
             session, task_list_name, request.state.user
@@ -84,7 +84,7 @@ async def remove_task(
     request: Request,
     task_name: str,
     task_list_name: str,
-):
+) -> Any:
     async with AsyncSessionManager() as session:
         task_list_obj = await TaskListRepository.get_task_list_by_name_and_user(
             session, task_list_name, request.state.user
@@ -104,3 +104,59 @@ async def remove_task(
             )
         await TaskRepository.delete_one(task_obj.id, session)
         return "Deleted"
+
+
+@task_list_router.put(
+    "/{task_list_name}/",
+    dependencies=[Depends(jwt_required)],
+    response_model=TaskListModel,
+)
+async def update_task_list(
+    request: Request, task_list_name: str, task_list: TaskListModel
+) -> Any:
+    async with AsyncSessionManager() as session:
+        task_list_obj = await TaskListRepository.get_task_list_by_name_and_user(
+            session, task_list_name, request.state.user
+        )
+        if task_list_obj is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="You have no lists with the name",
+            )
+        if task_list.name:
+            task_list_obj.name = task_list.name
+        if task_list.active_date:
+            task_list_obj.active_date = task_list.active_date
+
+        return task_list_obj
+
+
+@task_list_router.put(
+    "/{task_list_name}/{task_name}/",
+    dependencies=[Depends(jwt_required)],
+    response_model=TaskModel,
+)
+async def update_task(
+    request: Request, task_list_name: str, task_name: str, task: TaskModel
+) -> Any:
+    async with AsyncSessionManager() as session:
+        task_list_obj = await TaskListRepository.get_task_list_by_name_and_user(
+            session, task_list_name, request.state.user
+        )
+        if task_list_obj is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="You have no lists with the name",
+            )
+        task_obj = await TaskRepository.get_task_by_name_and_list(
+            session, task_name, task_list_obj
+        )
+        if task_obj is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="You have no tasks with the name in that list",
+            )
+        await TaskRepository.update_one(
+            session, task_obj.id, **task.model_dump(exclude_none=True)
+        )
+        return task_obj
