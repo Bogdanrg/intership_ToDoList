@@ -1,10 +1,9 @@
 from fastapi import HTTPException, Request
 
-from repos.user_repo import UserRepository
-from user.service import JWTService
-
 from base.classes import AsyncSessionManager
 from base.services import AuthService
+from repos.user_repo import UserRepository
+from user.service import JWTService
 
 
 async def jwt_required(request: Request):

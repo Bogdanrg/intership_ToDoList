@@ -4,10 +4,9 @@ from sqlalchemy import Result, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from repos.base_repo import BaseRepository
 from task_list.models import TaskList
 from user.models import User
-
-from repos.base_repo import BaseRepository
 
 
 class TaskListRepository(BaseRepository):

@@ -55,4 +55,3 @@ async def access_token() -> str:
 @pytest.fixture
 def user() -> dict:
     return {"username": "Bogdan", "password": "password", "email": "user@gmail.com"}
-

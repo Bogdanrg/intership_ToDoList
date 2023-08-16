@@ -3,10 +3,9 @@ from typing import Any
 from sqlalchemy import Result, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from repos.base_repo import BaseRepository
 from task.models import Task
 from task_list.models import TaskList
-
-from repos.base_repo import BaseRepository
 
 
 class TaskRepository(BaseRepository):

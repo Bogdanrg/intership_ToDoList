@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.database import Base
 from task_list.models import TaskList  # noqa F401
