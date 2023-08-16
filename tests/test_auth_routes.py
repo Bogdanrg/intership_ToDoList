@@ -2,14 +2,14 @@ import pytest
 from httpx import AsyncClient
 
 from base.classes import AsyncSessionManager
-from constants import BASE_URL, user
+from constants import BASE_URL
 from main import app
 from repos.user_repo import UserRepository
 from user.service import HasherService
 
 
 @pytest.mark.asyncio
-async def test_registration_route(session_fixture):
+async def test_registration_route(session_fixture, user):
     async with AsyncClient(app=app, base_url=BASE_URL) as ac:
         response = await ac.post("/api/auth/registration/", json=user)
     await UserRepository.delete_one(response.json().get("id"), session_fixture)
@@ -27,7 +27,7 @@ async def test_registration_route_without_data():
 
 
 @pytest.mark.asyncio
-async def test_login_route():
+async def test_login_route(user):
     data = {"username": user["username"], "password": user["password"]}
     password_hash = HasherService.get_password_hash(user["password"])
     async with AsyncSessionManager() as session:

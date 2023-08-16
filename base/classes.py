@@ -22,8 +22,6 @@ class AsyncSessionManager:
 
     async def commit(self) -> None:
         await self.session.commit()
-        await self.session.close()
 
     async def rollback(self) -> None:
         await self.session.rollback()
-        await self.session.close()

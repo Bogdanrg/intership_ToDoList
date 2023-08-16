@@ -50,3 +50,9 @@ async def access_token() -> str:
     access_token = await JWTService.encode_access_token("Bogdan")
     yield access_token
     del access_token
+
+
+@pytest.fixture
+def user() -> dict:
+    return {"username": "Bogdan", "password": "password", "email": "user@gmail.com"}
+

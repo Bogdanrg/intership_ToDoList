@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload
 from task_list.models import TaskList
 from user.models import User
 
-from .base_repo import BaseRepository
+from repos.base_repo import BaseRepository
 
 
 class TaskListRepository(BaseRepository):

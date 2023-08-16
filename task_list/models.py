@@ -1,7 +1,8 @@
 import datetime
+from typing import List
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy import ForeignKey, DateTime
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from core.database import Base
 from task.models import Task  # noqa: F401
@@ -10,9 +11,9 @@ from task.models import Task  # noqa: F401
 class TaskList(Base):
     __tablename__ = "task_lists"
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String, default="ToDo list")
-    active_date = Column(DateTime, default=datetime.datetime.now)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    user = relationship("User", back_populates="lists")
-    tasks = relationship("Task", backref="list")
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(default="ToDo list")
+    active_date: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.now)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user: Mapped["User"] = relationship(back_populates="lists")
+    tasks: Mapped[List["Task"]] = relationship(backref="list")

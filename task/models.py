@@ -1,4 +1,5 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import ForeignKey
 from sqlalchemy_utils.types import ChoiceType
 
 from core.database import Base
@@ -9,8 +10,8 @@ class Task(Base):
 
     TASK_STATUSES = (("done", "done"), ("in-progress", "in-progress"))
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    content = Column(Text)
-    status = Column(ChoiceType(choices=TASK_STATUSES), default="in-progress")
-    list_id = Column(Integer, ForeignKey("task_lists.id"))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    content: Mapped[str]
+    status: Mapped[str] = mapped_column(ChoiceType(choices=TASK_STATUSES), default="in-progress")
+    list_id: Mapped[int] = mapped_column(ForeignKey("task_lists.id"))
