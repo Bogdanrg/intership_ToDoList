@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
 
-from constants import BASE_URL, user
+from constants import BASE_URL
 from main import app
 from repos.task_list_repo import TaskListRepository
 from repos.task_repo import TaskRepository
@@ -9,9 +9,11 @@ from repos.user_repo import UserRepository
 
 
 @pytest.mark.asyncio
-async def test_create_task_list(session_fixture, access_token):
+async def test_create_task_list(session_fixture, access_token, user):
+    # Arrange
     data = {"name": "abc"}
-    headers = {"JWT": access_token}
+    headers = {"Authorization": access_token}
+    # Act
     user_obj = await UserRepository.insert_one(session_fixture, **user)
     await session_fixture.commit()
     async with AsyncClient(app=app, base_url=BASE_URL, headers=headers) as ac:
@@ -19,27 +21,33 @@ async def test_create_task_list(session_fixture, access_token):
     await TaskListRepository.delete_one(response.json().get("id"), session_fixture)
     await UserRepository.delete_one(user_obj.id, session_fixture)
     await session_fixture.commit()
+    # Assert
     assert response.status_code == 200
     assert set(response.json().keys()) == {"id", "name", "active_date"}
 
 
 @pytest.mark.asyncio
-async def test_get_wrong_task_list(session_fixture, access_token):
-    headers = {"JWT": access_token}
+async def test_get_wrong_task_list(session_fixture, access_token, user):
+    # Arrange
+    headers = {"Authorization": access_token}
     user_obj = await UserRepository.insert_one(session_fixture, **user)
+    # Act
     await session_fixture.commit()
     async with AsyncClient(app=app, base_url=BASE_URL, headers=headers) as ac:
         response = await ac.get("/api/v1/task_list/my_list/")
     await UserRepository.delete_one(user_obj.id, session_fixture)
     await session_fixture.commit()
+    # Assert
     assert response.status_code == 400
     assert response.content == b'{"detail":"You have no lists with the name"}'
 
 
 @pytest.mark.asyncio
-async def test_get_task_list(session_fixture, access_token):
+async def test_get_task_list(session_fixture, access_token, user):
+    # Arrange
     data = {"name": "abc", "content": "do it"}
-    headers = {"JWT": access_token}
+    headers = {"Authorization": access_token}
+    # Act
     user_obj = await UserRepository.insert_one(session_fixture, **user)
     task_list_obj = await TaskListRepository.insert_one(
         session_fixture, name="list", user=user_obj
@@ -54,6 +62,7 @@ async def test_get_task_list(session_fixture, access_token):
     await TaskListRepository.delete_one(task_list_obj.id, session_fixture)
     await UserRepository.delete_one(user_obj.id, session_fixture)
     await session_fixture.commit()
+    # Assert
     assert response.status_code == 200
     assert set(response.json()[0].keys()) == {
         "id",
@@ -65,9 +74,11 @@ async def test_get_task_list(session_fixture, access_token):
 
 
 @pytest.mark.asyncio
-async def test_add_task(session_fixture, access_token):
+async def test_add_task(session_fixture, access_token, user):
+    # Arrange
     data = {"name": "abc", "content": "do it"}
-    headers = {"JWT": access_token}
+    headers = {"Authorization": access_token}
+    # Act
     user_obj = await UserRepository.insert_one(session_fixture, **user)
     task_list_obj = await TaskListRepository.insert_one(
         session_fixture, name="list", user=user_obj
@@ -79,14 +90,17 @@ async def test_add_task(session_fixture, access_token):
     await TaskListRepository.delete_one(task_list_obj.id, session_fixture)
     await UserRepository.delete_one(user_obj.id, session_fixture)
     await session_fixture.commit()
+    # Assert
     assert response.status_code == 200
     assert set(response.json().keys()) == {"id", "name", "content", "list_id", "status"}
 
 
 @pytest.mark.asyncio
-async def test_delete_wrong_task(session_fixture, access_token):
+async def test_delete_wrong_task(session_fixture, access_token, user):
+    # Arrange
     data = {"name": "abc", "content": "do it"}
-    headers = {"JWT": access_token}
+    headers = {"Authorization": access_token}
+    # Act
     user_obj = await UserRepository.insert_one(session_fixture, **user)
     task_list_obj = await TaskListRepository.insert_one(
         session_fixture, name="list", user=user_obj
@@ -101,6 +115,7 @@ async def test_delete_wrong_task(session_fixture, access_token):
     await TaskListRepository.delete_one(task_list_obj.id, session_fixture)
     await UserRepository.delete_one(user_obj.id, session_fixture)
     await session_fixture.commit()
+    # Assert
     assert response.status_code == 400
     assert (
         response.content == b'{"detail":"You have no tasks with the name in that list"}'
@@ -108,9 +123,11 @@ async def test_delete_wrong_task(session_fixture, access_token):
 
 
 @pytest.mark.asyncio
-async def test_delete_task(session_fixture, access_token):
+async def test_delete_task(session_fixture, access_token, user):
+    # Arrange
     data = {"name": "abc", "content": "do it"}
-    headers = {"JWT": access_token}
+    headers = {"Authorization": access_token}
+    # Act
     user_obj = await UserRepository.insert_one(session_fixture, **user)
     task_list_obj = await TaskListRepository.insert_one(
         session_fixture, name="list", user=user_obj
@@ -125,15 +142,18 @@ async def test_delete_task(session_fixture, access_token):
     await TaskListRepository.delete_one(task_list_obj.id, session_fixture)
     await UserRepository.delete_one(user_obj.id, session_fixture)
     await session_fixture.commit()
+    # Assert
     assert response.status_code == 200
     assert response.json() == "Deleted"
 
 
 @pytest.mark.asyncio
-async def test_update_task(session_fixture, access_token):
+async def test_update_task(session_fixture, access_token, user):
+    # Arrange
     data = {"name": "abc", "content": "do it"}
     new_data = {"name": "asdf", "content": "something", "status": "done"}
-    headers = {"JWT": access_token}
+    headers = {"Authorization": access_token}
+    # Act
     user_obj = await UserRepository.insert_one(session_fixture, **user)
     task_list_obj = await TaskListRepository.insert_one(
         session_fixture, name="list", user=user_obj
@@ -148,6 +168,7 @@ async def test_update_task(session_fixture, access_token):
     await TaskListRepository.delete_one(task_list_obj.id, session_fixture)
     await UserRepository.delete_one(user_obj.id, session_fixture)
     await session_fixture.commit()
+    # Assert
     assert response.status_code == 200
     assert response.json().keys() == {"id", "name", "content", "list_id", "status"}
     assert response.json().get("name") == "asdf"
@@ -156,9 +177,11 @@ async def test_update_task(session_fixture, access_token):
 
 
 @pytest.mark.asyncio
-async def test_update_task_list(session_fixture, access_token):
+async def test_update_task_list(session_fixture, access_token, user):
+    # Arrange
     new_data = {"name": "new_task_list"}
-    headers = {"JWT": access_token}
+    headers = {"Authorization": access_token}
+    # Act
     user_obj = await UserRepository.insert_one(session_fixture, **user)
     task_list_obj = await TaskListRepository.insert_one(
         session_fixture, name="list", user=user_obj
@@ -169,6 +192,7 @@ async def test_update_task_list(session_fixture, access_token):
     await TaskListRepository.delete_one(task_list_obj.id, session_fixture)
     await UserRepository.delete_one(user_obj.id, session_fixture)
     await session_fixture.commit()
+    # Assert
     assert response.status_code == 200
     assert response.json().keys() == {"id", "name", "active_date"}
     assert response.json().get("name") == "new_task_list"

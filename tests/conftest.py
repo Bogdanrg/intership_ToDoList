@@ -48,6 +48,7 @@ async def session_fixture() -> AsyncSession:
 @pytest.fixture
 async def access_token() -> str:
     access_token = await JWTService.encode_access_token("Bogdan")
+    access_token = "Bearer " + access_token
     yield access_token
     del access_token
 

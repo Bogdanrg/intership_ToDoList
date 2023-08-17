@@ -1,11 +1,15 @@
 import datetime
 
 import jwt
+from fastapi import HTTPException
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette import status
 
 from config import app_settings
+from core.database import Base
 from repos.user_repo import UserRepository
+from schemas import SignUpModel
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -30,14 +34,19 @@ class JWTService:
 
     @staticmethod
     async def check_credentials(
-        session: AsyncSession, username: str, password: str
-    ) -> bool:
+            session: AsyncSession, username: str, password: str
+    ):
         user = await UserRepository.get_user_by_username(username, session)
         if not user:
-            return False
-        if HasherService.verify_password(password, user.password):
-            return True
-        return False
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid user"
+            )
+        if not HasherService.verify_password(password, user.password):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid password"
+            )
 
     @staticmethod
     async def encode_access_token(username: str) -> str:
@@ -46,7 +55,7 @@ class JWTService:
                 "username": username,
                 "type": "access_token",
                 "exp": datetime.datetime.now(tz=datetime.timezone.utc)
-                + datetime.timedelta(minutes=5),
+                       + datetime.timedelta(minutes=5),
             },
             app_settings.SECRET,
             algorithm=app_settings.ALGORITHM,
@@ -60,7 +69,7 @@ class JWTService:
                 "username": username,
                 "type": "refresh_token",
                 "exp": datetime.datetime.now(tz=datetime.timezone.utc)
-                + datetime.timedelta(hours=24),
+                       + datetime.timedelta(hours=24),
             },
             app_settings.SECRET,
             algorithm=app_settings.ALGORITHM,
@@ -82,23 +91,53 @@ class JWTService:
 
     @staticmethod
     async def refresh_access_token(
-        session: AsyncSession, refresh_token: str
+            session: AsyncSession, refresh_token: str
     ) -> dict | bool:
         payload = await JWTService.decode_token(refresh_token)
-        if not payload:
-            return False
+        if payload:
+            token_type = payload.get("type", "")
+            if token_type != "refresh_token":
+                raise HTTPException(
+                    status_code=400,
+                    detail="Wrong token type"
+                )
+            user = await UserRepository.get_user_by_username(
+                payload.get("username", ""), session
+            )
+            if user:
+                access_token = await JWTService.encode_access_token(payload.get("username", ""))
+                tokens = {"access_token": access_token, "refresh_token": refresh_token}
+                return tokens
 
-        token_type = payload.get("type", "")
-        if token_type != "refresh_token":
-            return False
-
-        user = await UserRepository.get_user_by_username(
-            payload.get("username", ""), session
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid refresh token"
         )
-        if not user:
-            return False
 
-        access_token = await JWTService.encode_access_token(payload.get("username", ""))
 
-        tokens = {"access_token": access_token, "refresh_token": refresh_token}
-        return tokens
+class UserService:
+    @staticmethod
+    async def is_unique_user(session: AsyncSession, user: SignUpModel) -> None:
+        user_username = await UserRepository.get_user_by_username(
+            user.username, session
+        )
+        if user_username is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username must be unique",
+            )
+        user_email = await UserRepository.get_user_by_email(user.email, session)
+        if user_email is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Email must be unique"
+            )
+
+    @staticmethod
+    async def create_user(session: AsyncSession, user) -> Base:
+        user = await UserRepository.insert_one(
+            session,
+            username=user.username,
+            email=user.email,
+            password=HasherService.get_password_hash(user.password),
+        )
+        return user
