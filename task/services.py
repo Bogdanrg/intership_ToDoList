@@ -12,18 +12,22 @@ from task_list.models import TaskList
 
 class TaskService:
     @staticmethod
-    async def create_task(session: AsyncSession, task: TaskModel, task_list_obj_id: int) -> Base:
+    async def create_task(
+        session: AsyncSession, task: TaskModel, task_list_obj_id: int
+    ) -> Base:
         task = await TaskRepository.insert_one(
             session,
             name=task.name,
             content=task.content,
             status=task.status,
-            list_id=task_list_obj_id
+            list_id=task_list_obj_id,
         )
         return task
 
     @staticmethod
-    async def get_task_be_name_and_list(session: AsyncSession, task_list_obj: TaskList, task_name: str) -> Result[Task]:
+    async def get_task_be_name_and_list(
+        session: AsyncSession, task_list_obj: TaskList, task_name: str
+    ) -> Result[Task]:
         task = await TaskRepository.get_task_by_name_and_list(
             session, task_name, task_list_obj
         )
@@ -35,7 +39,9 @@ class TaskService:
         return task
 
     @staticmethod
-    async def update_task(session: AsyncSession, task_obj_id: int, task: TaskModel) -> None:
+    async def update_task(
+        session: AsyncSession, task_obj_id: int, task: TaskModel
+    ) -> None:
         await TaskRepository.update_one(
             session, task_obj_id, **task.model_dump(exclude_none=True)
         )

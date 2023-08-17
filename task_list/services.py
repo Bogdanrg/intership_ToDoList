@@ -12,7 +12,9 @@ from user.models import User
 
 class TaskListService:
     @staticmethod
-    async def get_task_list_obj_by_name_and_user(session: AsyncSession, task_list: str, user: User) -> Result[TaskList]:
+    async def get_task_list_obj_by_name_and_user(
+        session: AsyncSession, task_list: str, user: User
+    ) -> Result[TaskList]:
         task_list = await TaskListRepository.get_task_list_by_name_and_user(
             session, task_list, user
         )
@@ -24,7 +26,9 @@ class TaskListService:
         return task_list
 
     @staticmethod
-    async def is_unique_task_list(session: AsyncSession, task_list: TaskListModel, user: User) -> None:
+    async def is_unique_task_list(
+        session: AsyncSession, task_list: TaskListModel, user: User
+    ) -> None:
         task_list_obj = await TaskListRepository.get_task_list_by_name_and_user(
             session, task_list.name, user
         )
@@ -35,17 +39,18 @@ class TaskListService:
             )
 
     @staticmethod
-    async def create_task_list(session: AsyncSession, task_list: TaskListModel, user: User) -> Base:
+    async def create_task_list(
+        session: AsyncSession, task_list: TaskListModel, user: User
+    ) -> Base:
         task_list = await TaskListRepository.insert_one(
-            session,
-            name=task_list.name,
-            active_date=task_list.active_date,
-            user=user
+            session, name=task_list.name, active_date=task_list.active_date, user=user
         )
         return task_list
 
     @staticmethod
-    async def update_task_list(task_list_obj: TaskList, task_list: TaskListModel) -> TaskList:
+    async def update_task_list(
+        task_list_obj: TaskList, task_list: TaskListModel
+    ) -> TaskList:
         if task_list.name:
             task_list_obj.name = task_list.name
         if task_list.active_date:

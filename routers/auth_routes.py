@@ -20,9 +20,7 @@ async def register_user(user: SignUpModel) -> Any:
 @auth_router.post("/login/", response_model=TokenPairModel)
 async def login_user(user: SignInModel) -> Any:
     async with AsyncSessionManager() as session:
-        await JWTService.check_credentials(
-            session, user.username, user.password
-        )
+        await JWTService.check_credentials(session, user.username, user.password)
         jwt_pair = await JWTService.get_token_pair(user.username)
         return jwt_pair
 

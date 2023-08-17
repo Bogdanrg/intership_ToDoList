@@ -18,8 +18,12 @@ task_list_router = APIRouter(prefix="/api/v1/task_list", tags=["task-list"])
 )
 async def create_list(request: Request, task_list: TaskListModel) -> Any:
     async with AsyncSessionManager() as session:
-        await TaskListService.is_unique_task_list(session, task_list, request.state.user)
-        task_list_obj = await TaskListService.create_task_list(session, task_list, request.state.user)
+        await TaskListService.is_unique_task_list(
+            session, task_list, request.state.user
+        )
+        task_list_obj = await TaskListService.create_task_list(
+            session, task_list, request.state.user
+        )
         return task_list_obj
 
 
@@ -30,7 +34,9 @@ async def create_list(request: Request, task_list: TaskListModel) -> Any:
 )
 async def get_task_list(request: Request, task_list_name: str) -> Any:
     async with AsyncSessionManager() as session:
-        task_list_obj = await TaskListService.get_task_list_obj_by_name_and_user(session, task_list_name, request.state.user)
+        task_list_obj = await TaskListService.get_task_list_obj_by_name_and_user(
+            session, task_list_name, request.state.user
+        )
         tasks = await TaskListRepository.get_task_list(session, task_list_obj)
         return tasks
 
@@ -42,7 +48,9 @@ async def get_task_list(request: Request, task_list_name: str) -> Any:
 )
 async def add_task(request: Request, task_list_name: str, task: TaskModel) -> Any:
     async with AsyncSessionManager() as session:
-        task_list_obj = await TaskListService.get_task_list_obj_by_name_and_user(session, task_list_name, request.state.user)
+        task_list_obj = await TaskListService.get_task_list_obj_by_name_and_user(
+            session, task_list_name, request.state.user
+        )
         task_obj = await TaskService.create_task(session, task, task_list_obj.id)
         return task_obj
 
@@ -56,8 +64,12 @@ async def remove_task(
     task_list_name: str,
 ) -> Any:
     async with AsyncSessionManager() as session:
-        task_list_obj = await TaskListService.get_task_list_obj_by_name_and_user(session, task_list_name, request.state.user)
-        task_obj = await TaskService.get_task_be_name_and_list(session, task_list_obj, task_name)
+        task_list_obj = await TaskListService.get_task_list_obj_by_name_and_user(
+            session, task_list_name, request.state.user
+        )
+        task_obj = await TaskService.get_task_be_name_and_list(
+            session, task_list_obj, task_name
+        )
         await TaskRepository.delete_one(task_obj.id, session)
         return "Deleted"
 
@@ -71,7 +83,9 @@ async def update_task_list(
     request: Request, task_list_name: str, task_list: TaskListModel
 ) -> Any:
     async with AsyncSessionManager() as session:
-        task_list_obj = await TaskListService.get_task_list_obj_by_name_and_user(session, task_list_name, request.state.user)
+        task_list_obj = await TaskListService.get_task_list_obj_by_name_and_user(
+            session, task_list_name, request.state.user
+        )
         task_list_obj = await TaskListService.update_task_list(task_list_obj, task_list)
         return task_list_obj
 
@@ -85,7 +99,11 @@ async def update_task(
     request: Request, task_list_name: str, task_name: str, task: TaskModel
 ) -> Any:
     async with AsyncSessionManager() as session:
-        task_list_obj = await TaskListService.get_task_list_obj_by_name_and_user(session, task_list_name, request.state.user)
-        task_obj = await TaskService.get_task_be_name_and_list(session, task_list_obj, task_name)
+        task_list_obj = await TaskListService.get_task_list_obj_by_name_and_user(
+            session, task_list_name, request.state.user
+        )
+        task_obj = await TaskService.get_task_be_name_and_list(
+            session, task_list_obj, task_name
+        )
         await TaskService.update_task(session, task_obj.id, task)
         return task_obj
