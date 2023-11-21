@@ -28,6 +28,7 @@ services:
     restart: always
     networks:
       - data
+
   consumer:
     build: .
     container_name: 'consumer'
@@ -36,6 +37,7 @@ services:
       - backend
     networks:
       - data
+
 volumes:
   analyze:
     external: true

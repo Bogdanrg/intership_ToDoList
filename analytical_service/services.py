@@ -1,3 +1,5 @@
+from typing import List
+
 from repos.food_repo import FoodRepository
 from repos.phone_repo import PhoneRepository
 from schemas import PhoneModel, FoodModel
@@ -33,3 +35,13 @@ class AnalyticalServices:
         food = await FoodRepository.get_all()
         food = food[0]
         return food
+
+    @staticmethod
+    async def get_phone_list() -> List[dict]:
+        phone_list = await PhoneRepository.get_all()
+        return phone_list
+
+    @staticmethod
+    async def get_food_list() -> List[dict]:
+        food_list = await FoodRepository.get_all()
+        return food_list

@@ -1,13 +1,10 @@
 import asyncio
 import json
 import logging
-import os
 
 from aiokafka import AIOKafkaConsumer
 from analytical_service.services import AnalyticalServices
-from dotenv import load_dotenv
-
-load_dotenv()
+from config import app_settings
 
 
 class AIOConsumer:
@@ -21,8 +18,8 @@ class AIOConsumer:
     @staticmethod
     async def consume():
         consumer = AIOKafkaConsumer(
-            os.environ.get("KAFKA_TOPIC_NAME"),
-            bootstrap_servers=[os.environ.get("BOOTSTRAP_SERVER")],
+            app_settings.KAFKA_TOPIC_NAME,
+            bootstrap_servers=[app_settings.BOOTSTRAP_SERVER],
             group_id="analyze-group"
         )
         await consumer.start()
