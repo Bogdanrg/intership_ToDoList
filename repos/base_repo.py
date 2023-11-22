@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from core.database import db
 
@@ -8,7 +8,7 @@ class BaseRepository:
 
     @classmethod
     async def create(cls, data: dict) -> None:
-        data.update({"count": 0})
+        data["count"] = 0
         await cls.collection.insert_one(data)
 
     @classmethod
@@ -17,7 +17,7 @@ class BaseRepository:
         await cls.collection.update_one({"id": document_id}, {"$set": {"count": document['count'] + 1}})
 
     @classmethod
-    async def get_all(cls) -> List[dict]:
-        documents = cls.collection.find({}, {"_id": False}).sort("count", -1)
-        document_list = await documents.to_list(1000)
+    async def get_all(cls, page: int = 1, limit: int = 10) -> List[dict]:
+        documents = cls.collection.find({}, {"_id": False}).sort("count", -1).skip((page - 1) * limit).limit(limit)
+        document_list = await documents.to_list(limit)
         return document_list

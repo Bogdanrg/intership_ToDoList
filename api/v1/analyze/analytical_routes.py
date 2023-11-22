@@ -5,7 +5,7 @@ from schemas import PhoneModel, FoodModel
 from analytical_service.services import AnalyticalServices
 
 
-analytical_router = APIRouter(prefix="/api/v1/analyze", tags=["analytical_service"])
+analytical_router = APIRouter(prefix="/analyze", tags=["analytical_service"])
 
 
 @analytical_router.get("/most_popular_phone", response_model=PhoneModel)
@@ -21,12 +21,12 @@ async def get_most_popular_food_doc() -> dict:
 
 
 @analytical_router.get("/phones", response_model=List[PhoneModel])
-async def get_phone_documents() -> List[dict]:
-    phone_list = await AnalyticalServices.get_phone_list()
+async def get_phone_documents(page: int, limit: int) -> List[dict]:
+    phone_list = await AnalyticalServices.get_phone_list(page, limit)
     return phone_list
 
 
 @analytical_router.get("/food", response_model=List[FoodModel])
-async def get_food_documents() -> List[dict]:
-    food_list = await AnalyticalServices.get_food_list()
+async def get_food_documents(page: int, limit: int) -> List[dict]:
+    food_list = await AnalyticalServices.get_food_list(page, limit)
     return food_list

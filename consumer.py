@@ -4,7 +4,7 @@ import logging
 
 from aiokafka import AIOKafkaConsumer
 from analytical_service.services import AnalyticalServices
-from config import app_settings
+from config import settings
 
 
 class AIOConsumer:
@@ -18,8 +18,8 @@ class AIOConsumer:
     @staticmethod
     async def consume():
         consumer = AIOKafkaConsumer(
-            app_settings.KAFKA_TOPIC_NAME,
-            bootstrap_servers=[app_settings.BOOTSTRAP_SERVER],
+            settings.kafka.KAFKA_TOPIC_NAME,
+            bootstrap_servers=[settings.kafka.BOOTSTRAP_SERVER],
             group_id="analyze-group"
         )
         await consumer.start()

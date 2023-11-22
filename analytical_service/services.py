@@ -2,7 +2,6 @@ from typing import List
 
 from repos.food_repo import FoodRepository
 from repos.phone_repo import PhoneRepository
-from schemas import PhoneModel, FoodModel
 
 
 class AnalyticalServices:
@@ -26,22 +25,22 @@ class AnalyticalServices:
 
     @staticmethod
     async def get_the_most_popular_phone() -> dict:
-        phones = await PhoneRepository.get_all()
+        phones = await PhoneRepository.get_all(1, 1)
         phone = phones[0]
         return phone
 
     @staticmethod
     async def get_the_most_popular_food() -> dict:
-        food = await FoodRepository.get_all()
+        food = await FoodRepository.get_all(1, 1)
         food = food[0]
         return food
 
     @staticmethod
-    async def get_phone_list() -> List[dict]:
-        phone_list = await PhoneRepository.get_all()
+    async def get_phone_list(page: int, limit: int) -> List[dict]:
+        phone_list = await PhoneRepository.get_all(page, limit)
         return phone_list
 
     @staticmethod
-    async def get_food_list() -> List[dict]:
-        food_list = await FoodRepository.get_all()
+    async def get_food_list(page: int, limit: int) -> List[dict]:
+        food_list = await FoodRepository.get_all(page, limit)
         return food_list
