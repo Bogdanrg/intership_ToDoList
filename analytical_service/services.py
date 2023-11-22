@@ -20,7 +20,6 @@ class AnalyticalServices:
 
     @staticmethod
     async def search_phone_document(data: dict) -> None:
-        print(data)
         await PhoneRepository.increase_count(data.get("id"))
 
     @staticmethod
