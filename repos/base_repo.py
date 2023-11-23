@@ -21,3 +21,8 @@ class BaseRepository:
         documents = cls.collection.find({}, {"_id": False}).sort("count", -1).skip((page - 1) * limit).limit(limit)
         document_list = await documents.to_list(limit)
         return document_list
+
+    @classmethod
+    async def get_biggest_count(cls) -> dict:
+        document = await cls.collection.find_one({"count": {"$max": "count"}})
+        return document
